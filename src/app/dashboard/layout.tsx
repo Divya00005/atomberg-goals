@@ -17,7 +17,7 @@ import {
   LogOut,
   ChevronRight,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+
 
 // ── Nav config per role ─────────────────────────────────────
 const NAV_ITEMS = {
@@ -34,10 +34,10 @@ const NAV_ITEMS = {
   ],
 };
 
-const ROLE_BADGE: Record<string, { label: string; color: string }> = {
-  employee: { label: 'Employee', color: 'bg-sky-500/15 text-sky-400 border-sky-500/20' },
-  manager: { label: 'Manager', color: 'bg-violet-500/15 text-violet-400 border-violet-500/20' },
-  admin: { label: 'Admin', color: 'bg-amber-500/15 text-amber-400 border-amber-500/20' },
+const ROLE_BADGES = {
+  employee: 'bg-violet-500/10 text-violet-400 border-violet-500/20 shadow-[0_0_10px_rgba(124,58,237,0.2)]',
+  manager: 'bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.3)] animate-pulse',
+  admin: 'bg-red-500/10 text-red-400 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]',
 };
 
 // ── Floating particles for global background ────────────────
@@ -74,7 +74,7 @@ function SidebarContent({
   const supabase = createClient();
   const role = profile?.role ?? 'employee';
   const navItems = NAV_ITEMS[role] ?? [];
-  const badge = ROLE_BADGE[role];
+  const badgeClass = ROLE_BADGES[role as keyof typeof ROLE_BADGES] || ROLE_BADGES.employee;
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -93,9 +93,9 @@ function SidebarContent({
           transition={{ type: 'spring', stiffness: 200, damping: 20, delay: 0.1 }}
         >
           <motion.div
-            className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 logo-pulse"
-            whileHover={{ rotate: 360, scale: 1.1 }}
-            transition={{ duration: 0.5 }}
+            className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
           >
             <Target className="w-4 h-4 text-white" />
           </motion.div>
@@ -171,37 +171,41 @@ function SidebarContent({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
       >
-        <div className="flex items-center gap-3 px-3 py-3 rounded-lg glass">
-          <motion.div
-            className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0 avatar-glow"
-            whileHover={{ scale: 1.15 }}
-          >
-            <span className="text-white text-xs font-semibold">
-              {profile?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
-            </span>
-          </motion.div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white text-xs font-medium truncate">
-              {profile?.full_name || 'User'}
-            </p>
-            <span
-              className={cn(
-                'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border mt-0.5',
-                badge?.color
-              )}
-            >
-              {badge?.label}
-            </span>
+        <div className="p-4 border-t border-white/5 bg-black/20 backdrop-blur-md">
+          <div className="flex items-center justify-between group/user">
+            <div className="flex items-center gap-3 overflow-hidden">
+              <div className="relative">
+                {role === 'manager' ? (
+                  <div className="absolute -inset-1 rounded-full border border-amber-500/40 border-dashed animate-[spin_8s_linear_infinite]" />
+                ) : role === 'admin' ? (
+                  <div className="absolute -inset-1 rounded-full border border-red-500/40 border-dashed animate-[spin_8s_linear_infinite]" />
+                ) : (
+                  <div className="absolute -inset-1 rounded-full border border-violet-500/40 border-dashed animate-[spin_8s_linear_infinite]" />
+                )}
+                <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center font-medium text-white shadow-inner relative z-10">
+                  {profile?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-xs font-medium truncate">
+                  {profile?.full_name || 'User'}
+                </p>
+                <span
+                  className={cn(
+                    'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border mt-0.5',
+                    badgeClass
+                  )}
+                >
+                  {role.charAt(0).toUpperCase() + role.slice(1)}
+                </span>
+              </div>
+            </div>
+            <form action="/auth/signout" method="post">
+              <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-300 hover:rotate-12 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                <LogOut className="w-4 h-4" />
+              </button>
+            </form>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleLogout}
-            title="Sign out"
-            className="h-7 w-7 text-slate-500 hover:text-red-400 hover:bg-red-500/10 shrink-0 btn-bounce"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-          </Button>
         </div>
       </motion.div>
     </div>
