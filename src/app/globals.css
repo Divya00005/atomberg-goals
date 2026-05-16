@@ -92,3 +92,221 @@
     @apply font-sans;
   }
 }
+
+/* ═══════════════════════════════════════════════════
+   PREMIUM ANIMATIONS & EFFECTS
+   ═══════════════════════════════════════════════════ */
+
+/* ── Glassmorphism ─────────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ── Gradient Text ─────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #a78bfa, #818cf8, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Neon Glow Effects ─────────────────────────────── */
+.glow-violet {
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.15),
+              0 0 60px rgba(124, 58, 237, 0.05);
+}
+
+.glow-violet-hover:hover {
+  box-shadow: 0 0 25px rgba(124, 58, 237, 0.25),
+              0 0 80px rgba(124, 58, 237, 0.1);
+}
+
+/* ── Card hover lift ───────────────────────────────── */
+.card-hover {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.3s ease;
+  will-change: transform;
+}
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15),
+              0 0 0 1px rgba(124, 58, 237, 0.1);
+}
+
+/* ── Button Spring Bounce ──────────────────────────── */
+.btn-bounce {
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+.btn-bounce:active {
+  transform: scale(0.95);
+}
+
+/* ── Shimmer/Shine Effect ──────────────────────────── */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  transition: none;
+  will-change: left;
+}
+.shimmer:hover::after {
+  animation: shimmer-slide 0.8s ease-in-out;
+}
+
+@keyframes shimmer-slide {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* ── Pulsing Status Glow ───────────────────────────── */
+.pulse-yellow {
+  animation: pulse-yellow-glow 2s ease-in-out infinite;
+}
+@keyframes pulse-yellow-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(234, 179, 8, 0.2); }
+  50% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.4), 0 0 30px rgba(234, 179, 8, 0.1); }
+}
+
+.pulse-green {
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.25),
+              0 0 30px rgba(34, 197, 94, 0.08);
+}
+
+.shimmer-blue {
+  animation: shimmer-blue-glow 3s ease-in-out infinite;
+}
+@keyframes shimmer-blue-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.15); }
+  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1); }
+}
+
+/* ── Floating Particles (CSS) ──────────────────────── */
+@keyframes particle-float {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(139, 92, 246, 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particle-float linear infinite;
+}
+
+/* ── Aurora / Wave Effect ──────────────────────────── */
+@keyframes aurora {
+  0% { transform: translateX(-20%) rotate(0deg); }
+  50% { transform: translateX(20%) rotate(3deg); }
+  100% { transform: translateX(-20%) rotate(0deg); }
+}
+
+.aurora-wave {
+  position: absolute;
+  bottom: 0;
+  left: -20%;
+  width: 140%;
+  height: 300px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(124, 58, 237, 0.06) 40%,
+    rgba(99, 102, 241, 0.1) 70%,
+    rgba(124, 58, 237, 0.03) 100%
+  );
+  border-radius: 50% 50% 0 0;
+  animation: aurora 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Animated Grid Pattern ─────────────────────────── */
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(124, 58, 237, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: grid-drift 20s linear infinite;
+}
+
+@keyframes grid-drift {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 40px; }
+}
+
+/* ── Animated Gradient Mesh ────────────────────────── */
+@keyframes gradient-mesh {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-mesh-bg {
+  background: linear-gradient(
+    -45deg,
+    #0a0a1a,
+    #1a0a2e,
+    #0a1a2e,
+    #1a0a1a,
+    #0a0a2e
+  );
+  background-size: 400% 400%;
+  animation: gradient-mesh 15s ease infinite;
+}
+
+/* ── Icon Spin on Hover ────────────────────────────── */
+.icon-spin-hover:hover .icon-target {
+  animation: spin-360 0.6s ease-in-out;
+}
+@keyframes spin-360 {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ── Progress Bar Animation ────────────────────────── */
+.progress-animated {
+  transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Typing Cursor ─────────────────────────────────── */
+.typing-cursor::after {
+  content: '|';
+  animation: blink 0.8s step-end infinite;
+  color: #7c3aed;
+  font-weight: 300;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ── Scrollbar Styling ─────────────────────────────── */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }

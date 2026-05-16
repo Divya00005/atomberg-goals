@@ -3,8 +3,8 @@ export const dynamic = 'force-dynamic';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import GoalList from '@/components/goals/GoalList';
+import AnimatedStats from '@/components/effects/AnimatedStats';
 import { Target, TrendingUp, Clock, CheckCircle2 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import type { Goal } from '@/types/supabase';
 
 
@@ -80,25 +80,7 @@ export default async function EmployeePage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map(({ label, value, icon: Icon, color, bg, sub }) => (
-          <Card
-            key={label}
-            className="bg-white/3 border-white/5 hover:border-white/10 transition-colors"
-          >
-            <CardContent className="p-5">
-              <div
-                className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center mb-4`}
-              >
-                <Icon className={`w-4 h-4 ${color}`} />
-              </div>
-              <p className={`text-2xl font-bold ${color}`}>{value}</p>
-              <p className="text-white text-xs font-medium mt-0.5">{label}</p>
-              <p className="text-slate-600 text-[11px] mt-0.5">{sub}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <AnimatedStats stats={stats} />
 
       {/* Goal list */}
       <GoalList goals={goalList} year={year} />

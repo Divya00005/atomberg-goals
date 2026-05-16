@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import type { Profile } from '@/types/supabase';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Target,
   TrendingUp,
@@ -67,11 +68,21 @@ function SidebarContent({
     <div className="flex flex-col h-full py-6">
       {/* Logo */}
       <div className="px-5 mb-8 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div>
-            <p className="text-white font-semibold text-xl tracking-tight">GoalTracker</p>
-          </div>
-        </div>
+        <motion.div
+          className="flex items-center gap-3"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 20, delay: 0.1 }}
+        >
+          <motion.div
+            className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20"
+            whileHover={{ rotate: 360, scale: 1.1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Target className="w-4 h-4 text-white" />
+          </motion.div>
+          <p className="text-white font-semibold text-xl tracking-tight">GoalTracker</p>
+        </motion.div>
         {onClose && (
           <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors lg:hidden">
             <X className="w-5 h-5" />
@@ -81,45 +92,77 @@ function SidebarContent({
 
       {/* Nav */}
       <nav className="flex-1 px-3 space-y-1">
-        <p className="px-3 mb-3 text-xs font-medium text-slate-600 uppercase tracking-widest">
+        <motion.p
+          className="px-3 mb-3 text-xs font-medium text-slate-600 uppercase tracking-widest"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           {role === 'employee' ? 'My Space' : role === 'manager' ? 'Team' : 'Administration'}
-        </p>
-        {navItems.map(({ href, icon: Icon, label }) => {
+        </motion.p>
+        {navItems.map(({ href, icon: Icon, label }, i) => {
           const active = pathname === href;
           return (
-            <Link
+            <motion.div
               key={href}
-              href={href}
-              onClick={onClose}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group',
-                active
-                  ? 'bg-violet-500/15 text-violet-300'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
-              )}
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                type: 'spring',
+                stiffness: 250,
+                damping: 20,
+                delay: 0.3 + i * 0.08,
+              }}
             >
-              <Icon
+              <Link
+                href={href}
+                onClick={onClose}
                 className={cn(
-                  'w-4 h-4 shrink-0 transition-colors',
-                  active ? 'text-violet-400' : 'text-slate-500 group-hover:text-slate-300'
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative',
+                  active
+                    ? 'bg-violet-500/15 text-violet-300'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5 hover:translate-x-1'
                 )}
-              />
-              {label}
-              {active && <ChevronRight className="w-3 h-3 ml-auto text-violet-400" />}
-            </Link>
+              >
+                {/* Animated active indicator */}
+                {active && (
+                  <motion.div
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-gradient-to-b from-violet-400 to-indigo-500 rounded-full"
+                    layoutId="active-nav-indicator"
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <Icon
+                  className={cn(
+                    'w-4 h-4 shrink-0 transition-colors',
+                    active ? 'text-violet-400' : 'text-slate-500 group-hover:text-slate-300'
+                  )}
+                />
+                {label}
+                {active && <ChevronRight className="w-3 h-3 ml-auto text-violet-400" />}
+              </Link>
+            </motion.div>
           );
         })}
       </nav>
 
       {/* User info + logout */}
-      <div className="px-3 pt-4 border-t border-white/5">
-        <div className="flex items-center gap-3 px-3 py-3 rounded-lg bg-white/3">
+      <motion.div
+        className="px-3 pt-4 border-t border-white/5"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+      >
+        <div className="flex items-center gap-3 px-3 py-3 rounded-lg glass">
           {/* Avatar */}
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0">
+          <motion.div
+            className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0 shadow-lg shadow-violet-500/20"
+            whileHover={{ scale: 1.15 }}
+          >
             <span className="text-white text-xs font-semibold">
               {profile?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
             </span>
-          </div>
+          </motion.div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-xs font-medium truncate">
               {profile?.full_name || 'User'}
@@ -138,12 +181,12 @@ function SidebarContent({
             size="icon"
             onClick={handleLogout}
             title="Sign out"
-            className="h-7 w-7 text-slate-500 hover:text-red-400 hover:bg-red-500/10 shrink-0"
+            className="h-7 w-7 text-slate-500 hover:text-red-400 hover:bg-red-500/10 shrink-0 btn-bounce"
           >
             <LogOut className="w-3.5 h-3.5" />
           </Button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -193,34 +236,54 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-[#0A0A0F] flex">
       {/* ── Desktop Sidebar ──────────────────────────── */}
-      <aside className="hidden lg:flex w-60 shrink-0 flex-col border-r border-white/5 bg-[#0D0D14]">
+      <motion.aside
+        className="hidden lg:flex w-60 shrink-0 flex-col border-r border-white/5 bg-[#0D0D14]"
+        initial={{ x: -60, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+      >
         <SidebarContent profile={profile} />
-      </aside>
+      </motion.aside>
 
       {/* ── Mobile Sidebar Overlay ───────────────────── */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-      <aside
-        className={cn(
-          'fixed top-0 left-0 h-full w-64 z-50 bg-[#0D0D14] border-r border-white/5 flex flex-col transition-transform duration-300 ease-in-out lg:hidden',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSidebarOpen(false)}
+          />
         )}
-      >
-        <SidebarContent profile={profile} onClose={() => setSidebarOpen(false)} />
-      </aside>
+      </AnimatePresence>
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.aside
+            className="fixed top-0 left-0 h-full w-64 z-50 bg-[#0D0D14] border-r border-white/5 flex flex-col lg:hidden"
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          >
+            <SidebarContent profile={profile} onClose={() => setSidebarOpen(false)} />
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
       {/* ── Main Content ────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-4 lg:px-8 border-b border-white/5 bg-[#0A0A0F]/80 backdrop-blur-md">
+        <motion.header
+          className="sticky top-0 z-30 h-14 flex items-center justify-between px-4 lg:px-8 border-b border-white/5 bg-[#0A0A0F]/80 backdrop-blur-md"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 25 }}
+        >
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-slate-400 hover:text-white transition-colors"
+              className="lg:hidden text-slate-400 hover:text-white transition-colors btn-bounce"
               aria-label="Open menu"
             >
               <Menu className="w-5 h-5" />
@@ -231,18 +294,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <span className="text-slate-500 text-sm hidden sm:block truncate max-w-[200px]">
               {profile?.email}
             </span>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+            <motion.div
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
               <span className="text-white text-xs font-semibold">
                 {profile?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
               </span>
-            </div>
+            </motion.div>
           </div>
-        </header>
+        </motion.header>
 
-        {/* Page content */}
-        <main className="flex-1 p-4 lg:p-8">
+        {/* Page content with fade-in */}
+        <motion.main
+          key={pathname}
+          className="flex-1 p-4 lg:p-8"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+        >
           {children}
-        </main>
+        </motion.main>
       </div>
     </div>
   );
