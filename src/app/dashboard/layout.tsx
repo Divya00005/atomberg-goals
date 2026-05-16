@@ -12,7 +12,6 @@ import {
   TrendingUp,
   Users,
   BarChart3,
-  FileDown,
   Menu,
   X,
   LogOut,
@@ -31,10 +30,7 @@ const NAV_ITEMS = {
     { href: '/dashboard/manager/check-ins', icon: TrendingUp, label: 'Team Check-ins' },
   ],
   admin: [
-    { href: '/dashboard/admin', icon: BarChart3, label: 'Overview' },
-    { href: '/dashboard/admin/users', icon: Users, label: 'All Users' },
-    { href: '/dashboard/admin/goals', icon: Target, label: 'All Goals' },
-    { href: '/dashboard/admin/export', icon: FileDown, label: 'Reports & Export' },
+    { href: '/dashboard/admin', icon: BarChart3, label: 'Dashboard Home' },
   ],
 };
 
