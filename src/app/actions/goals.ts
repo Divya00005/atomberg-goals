@@ -125,8 +125,8 @@ export async function updateGoal(
     return { success: false, error: 'Goal not found.' };
   }
 
-  if (currentGoal.status !== 'draft') {
-    return { success: false, error: 'Only draft goals can be edited.' };
+  if (currentGoal.status !== 'draft' && currentGoal.status !== 'rejected') {
+    return { success: false, error: 'Only draft or rejected goals can be edited.' };
   }
 
   // Check total excluding this goal
@@ -160,7 +160,7 @@ export async function updateGoal(
     })
     .eq('id', id)
     .eq('employee_id', user.id)
-    .eq('status', 'draft');
+    .in('status', ['draft', 'rejected']);
 
   if (updateError) return { success: false, error: updateError.message };
 
@@ -218,11 +218,11 @@ export async function submitGoalsForApproval(): Promise<ActionResult> {
     .select('id, weightage, status')
     .eq('employee_id', user.id)
     .eq('year', year)
-    .eq('status', 'draft');
+    .in('status', ['draft', 'rejected']);
 
   if (fetchError) return { success: false, error: fetchError.message };
   if (!goals || goals.length === 0) {
-    return { success: false, error: 'You have no draft goals to submit.' };
+    return { success: false, error: 'You have no draft or rejected goals to submit.' };
   }
 
   const total = goals.reduce((sum, g) => sum + g.weightage, 0);

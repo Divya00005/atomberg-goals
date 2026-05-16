@@ -82,12 +82,8 @@ export default function LoginPage() {
         <div className="relative z-10">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
-              <Target className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-white font-semibold text-xl tracking-tight">GoalTracker</span>
+            <span className="text-white font-semibold text-3xl tracking-tight">GoalTracker</span>
           </div>
-          <p className="text-slate-500 text-sm ml-[52px]">by Atomberg</p>
         </div>
 
         <div className="relative z-10">
@@ -118,7 +114,7 @@ export default function LoginPage() {
 
         <div className="relative z-10">
           <p className="text-slate-600 text-xs">
-            © {new Date().getFullYear()} Atomberg. All rights reserved.
+            © {new Date().getFullYear()} GoalTracker. All rights reserved.
           </p>
         </div>
       </div>
@@ -128,10 +124,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex items-center gap-3 mb-8 lg:hidden">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
-              <Target className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-white font-semibold text-lg">GoalTracker</span>
+            <span className="text-white font-semibold text-2xl">GoalTracker</span>
           </div>
 
           <div className="mb-8">

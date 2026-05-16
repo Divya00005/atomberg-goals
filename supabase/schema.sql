@@ -154,14 +154,18 @@ CREATE POLICY "profiles: own read"
   ON public.profiles FOR SELECT
   USING (auth.uid() = id);
 
+-- Helper function to bypass RLS for admin checks
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS(SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin');
+$$ LANGUAGE sql SECURITY DEFINER;
+
 -- Managers can view profiles of their direct reports
 CREATE POLICY "profiles: manager reads team"
   ON public.profiles FOR SELECT
   USING (
     manager_id = auth.uid()
-    OR auth.uid() IN (
-      SELECT id FROM public.profiles WHERE role = 'admin'
-    )
+    OR public.is_admin()
   );
 
 -- Users can update their own profile
@@ -172,11 +176,7 @@ CREATE POLICY "profiles: own update"
 -- Admins can view all profiles
 CREATE POLICY "profiles: admin full read"
   ON public.profiles FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
+  USING (public.is_admin());
 
 -- ── GOALS policies ─────────────────────────────────────────
 
@@ -197,11 +197,7 @@ CREATE POLICY "goals: manager access"
 -- Admins can view all goals
 CREATE POLICY "goals: admin read all"
   ON public.goals FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
+  USING (public.is_admin());
 
 -- ── CHECK-INS policies ─────────────────────────────────────
 
@@ -228,11 +224,7 @@ CREATE POLICY "check_ins: manager access"
 -- Admins can view all check-ins
 CREATE POLICY "check_ins: admin read all"
   ON public.check_ins FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
+  USING (public.is_admin());
 
 -- ─────────────────────────────────────────────
 -- 8. USEFUL INDEXES

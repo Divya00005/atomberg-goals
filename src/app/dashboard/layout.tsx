@@ -24,12 +24,11 @@ import { Button } from '@/components/ui/button';
 const NAV_ITEMS = {
   employee: [
     { href: '/dashboard/employee', icon: Target, label: 'My Goals' },
-    { href: '/dashboard/employee/checkins', icon: TrendingUp, label: 'My Check-ins' },
+    { href: '/dashboard/employee/check-ins', icon: TrendingUp, label: 'My Check-ins' },
   ],
   manager: [
     { href: '/dashboard/manager', icon: Users, label: 'My Team' },
-    { href: '/dashboard/manager/approvals', icon: ClipboardCheck, label: 'Approvals' },
-    { href: '/dashboard/manager/checkins', icon: TrendingUp, label: 'Team Check-ins' },
+    { href: '/dashboard/manager/check-ins', icon: TrendingUp, label: 'Team Check-ins' },
   ],
   admin: [
     { href: '/dashboard/admin', icon: BarChart3, label: 'Overview' },
@@ -70,12 +69,8 @@ function SidebarContent({
       {/* Logo */}
       <div className="px-5 mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30 shrink-0">
-            <Target className="w-4 h-4 text-white" />
-          </div>
           <div>
-            <p className="text-white font-semibold text-sm leading-tight">GoalTracker</p>
-            <p className="text-slate-500 text-xs">by Atomberg</p>
+            <p className="text-white font-semibold text-xl tracking-tight">GoalTracker</p>
           </div>
         </div>
         {onClose && (

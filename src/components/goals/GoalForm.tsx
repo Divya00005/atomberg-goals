@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { createGoal, updateGoal, type GoalFormData } from '@/app/actions/goals';
 import type { Goal, UomType } from '@/types/supabase';
 import {
@@ -54,6 +55,7 @@ export default function GoalForm({ open, onClose, editingGoal, usedWeightage }: 
   const [form, setForm] = useState<GoalFormData>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   // Pre-fill when editing
   useEffect(() => {
@@ -80,6 +82,7 @@ export default function GoalForm({ open, onClose, editingGoal, usedWeightage }: 
   const isOverBudget = (form.weightage || 0) > remaining;
   const isBelowMin = (form.weightage || 0) < 10;
   const isTimeline = form.uom_type === 'timeline';
+  const isShared = editingGoal?.is_shared ?? false;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +102,7 @@ export default function GoalForm({ open, onClose, editingGoal, usedWeightage }: 
 
     if (!result.success) { setError(result.error); return; }
     onClose();
+    router.refresh();
   };
 
   const set = <K extends keyof GoalFormData>(key: K, value: GoalFormData[K]) =>
@@ -113,10 +117,16 @@ export default function GoalForm({ open, onClose, editingGoal, usedWeightage }: 
               <Target className="w-4 h-4 text-violet-400" />
             </div>
             <DialogTitle className="text-white text-base font-semibold">
-              {editingGoal ? 'Edit Goal' : 'New Goal'}
+              {editingGoal ? (isShared ? 'Edit Shared Goal' : 'Edit Goal') : 'New Goal'}
             </DialogTitle>
           </div>
         </DialogHeader>
+
+        {isShared && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 mt-2">
+            <span className="text-indigo-400 text-sm">🔗 This is a shared goal. You can only adjust the <strong>weightage</strong>.</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
 
@@ -131,7 +141,8 @@ export default function GoalForm({ open, onClose, editingGoal, usedWeightage }: 
               value={form.thrust_area}
               onChange={(e) => set('thrust_area', e.target.value)}
               maxLength={100}
-              className="bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-violet-500 h-10"
+              disabled={isShared}
+              className={cn("bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-violet-500 h-10", isShared && 'opacity-60 cursor-not-allowed')}
             />
           </div>
 
@@ -146,7 +157,8 @@ export default function GoalForm({ open, onClose, editingGoal, usedWeightage }: 
               value={form.title}
               onChange={(e) => set('title', e.target.value)}
               maxLength={120}
-              className="bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-violet-500 h-10"
+              disabled={isShared}
+              className={cn("bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-violet-500 h-10", isShared && 'opacity-60 cursor-not-allowed')}
             />
           </div>
 

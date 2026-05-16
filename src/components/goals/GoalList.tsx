@@ -70,11 +70,14 @@ export default function GoalList({ goals, year }: Props) {
 
   const totalWeightage = goals.reduce((sum, g) => sum + g.weightage, 0);
   const draftGoals = goals.filter((g) => g.status === 'draft');
+  const rejectedGoals = goals.filter((g) => g.status === 'rejected');
+  const editableGoals = [...draftGoals, ...rejectedGoals];
   const hasDrafts = draftGoals.length > 0;
-  const hasNonDraft = goals.some((g) => g.status !== 'draft');
-  const isLocked = hasNonDraft; // any submission locks edit mode
-  const canAddMore = draftGoals.length < 8 && !isLocked;
-  const canSubmit = hasDrafts && totalWeightage === 100 && !isLocked;
+  const hasRejected = rejectedGoals.length > 0;
+  // Locked only if there are pending_approval or approved goals
+  const isLocked = goals.some((g) => g.status === 'pending_approval' || g.status === 'approved');
+  const canAddMore = goals.length < 8 && !isLocked;
+  const canSubmit = (hasDrafts || hasRejected) && totalWeightage === 100 && !isLocked;
   const usedWeightage = totalWeightage;
 
   const handleEdit = (goal: Goal) => {
@@ -197,6 +200,18 @@ export default function GoalList({ goals, year }: Props) {
         </div>
       )}
 
+      {/* ── Rejection Banner ──────────────────────────────── */}
+      {hasRejected && goals[0]?.rejection_reason && (
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+          <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-red-400 font-medium text-sm">Manager returned your goals for revision</p>
+            <p className="text-red-300/80 text-sm mt-1">&ldquo;{goals[0].rejection_reason}&rdquo;</p>
+            <p className="text-slate-500 text-xs mt-2">Edit your goals below and resubmit when ready.</p>
+          </div>
+        </div>
+      )}
+
       {/* ── Goal Cards ───────────────────────────────────── */}
       {goals.length > 0 && (
         <div className="space-y-3">
@@ -204,14 +219,25 @@ export default function GoalList({ goals, year }: Props) {
             const status = STATUS_CONFIG[goal.status];
             const StatusIcon = status.icon;
             const isDraft = goal.status === 'draft';
+            const isRejected = goal.status === 'rejected';
+            const isEditable = (isDraft || isRejected) && !isLocked;
 
             return (
               <div
                 key={goal.id}
-                className="group bg-white/3 border border-white/5 hover:border-white/10 rounded-xl p-5 transition-all duration-200"
+                className={cn(
+                  "group bg-white/3 border hover:border-white/10 rounded-xl p-5 transition-all duration-200",
+                  isRejected ? 'border-red-500/20' : 'border-white/5'
+                )}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
+                    {/* Shared badge */}
+                    {goal.is_shared && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border bg-indigo-500/15 text-indigo-400 border-indigo-500/25 mb-1.5">
+                        🔗 Shared Goal
+                      </span>
+                    )}
                     {/* Thrust area tag */}
                     {goal.thrust_area && (
                       <p className="text-violet-400/70 text-[11px] font-medium uppercase tracking-wider mb-1">
@@ -275,8 +301,8 @@ export default function GoalList({ goals, year }: Props) {
                 </div>
 
 
-                {/* Actions (only for draft) */}
-                {isDraft && !isLocked && (
+                {/* Actions (for draft and rejected goals) */}
+                {isEditable && (
                   <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
                       variant="ghost"
@@ -306,7 +332,7 @@ export default function GoalList({ goals, year }: Props) {
                 )}
 
                 {/* Locked indicator */}
-                {!isDraft && (
+                {!isEditable && !isRejected && !isDraft && (
                   <div className="flex items-center gap-1.5 mt-4 pt-4 border-t border-white/5">
                     <Lock className="w-3 h-3 text-slate-600" />
                     <span className="text-slate-600 text-xs">

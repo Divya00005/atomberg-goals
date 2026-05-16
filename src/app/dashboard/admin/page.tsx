@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { Users, Unlock, History, Activity } from 'lucide-react';
 import CsvExportButton from '@/components/admin/CsvExportButton';
 import UnlockGoalButton from '@/components/admin/UnlockGoalButton';
+import SharedGoalDialog from '@/components/admin/SharedGoalDialog';
 import { cn } from '@/lib/utils';
 import type { Profile, Goal, AuditLog } from '@/types/supabase';
 
@@ -54,7 +55,10 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
             Manage users, unlock goals, and audit system activity.
           </p>
         </div>
-        <CsvExportButton />
+        <div className="flex items-center gap-3">
+          <SharedGoalDialog employees={profiles} />
+          <CsvExportButton />
+        </div>
       </div>
 
       {/* Navigation Tabs */}

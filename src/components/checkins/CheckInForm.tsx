@@ -6,13 +6,6 @@ import type { Goal, CheckIn, Quarter, CheckinStatus } from '@/types/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Loader2, Save, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 type Props = {
@@ -135,20 +128,16 @@ export default function CheckInForm({ goal, quarter, quarterYear, existingCheckI
 
         <div className="space-y-1.5">
           <label className="text-xs text-slate-400">Status</label>
-          <Select
+          <select
             value={status}
-            onValueChange={(v) => setStatus(v as CheckinStatus)}
+            onChange={(e) => setStatus(e.target.value as CheckinStatus)}
             disabled={isPending}
+            className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
           >
-            <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 focus:ring-violet-500">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-[#1a1a24] border-white/10">
-              <SelectItem value="not_started" className="text-white focus:bg-white/10">Not Started</SelectItem>
-              <SelectItem value="on_track" className="text-white focus:bg-white/10">On Track</SelectItem>
-              <SelectItem value="completed" className="text-white focus:bg-white/10">Completed</SelectItem>
-            </SelectContent>
-          </Select>
+            <option value="not_started" className="bg-[#1a1a24] text-white">Not Started</option>
+            <option value="on_track" className="bg-[#1a1a24] text-white">On Track</option>
+            <option value="completed" className="bg-[#1a1a24] text-white">Completed</option>
+          </select>
         </div>
       </div>
 
