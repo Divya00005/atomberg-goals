@@ -44,6 +44,28 @@ const ROLE_BADGE: Record<string, { label: string; color: string }> = {
   admin: { label: 'Admin', color: 'bg-amber-500/15 text-amber-400 border-amber-500/20' },
 };
 
+// ── Floating particles for global background ────────────────
+function GlobalParticles() {
+  return (
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      {Array.from({ length: 25 }).map((_, i) => (
+        <div
+          key={i}
+          className="particle"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${60 + Math.random() * 40}%`,
+            animationDuration: `${10 + Math.random() * 15}s`,
+            animationDelay: `${Math.random() * 8}s`,
+            width: `${1 + Math.random() * 2}px`,
+            height: `${1 + Math.random() * 2}px`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function SidebarContent({
   profile,
   onClose,
@@ -75,7 +97,7 @@ function SidebarContent({
           transition={{ type: 'spring', stiffness: 200, damping: 20, delay: 0.1 }}
         >
           <motion.div
-            className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20"
+            className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 logo-pulse"
             whileHover={{ rotate: 360, scale: 1.1 }}
             transition={{ duration: 0.5 }}
           >
@@ -93,7 +115,7 @@ function SidebarContent({
       {/* Nav */}
       <nav className="flex-1 px-3 space-y-1">
         <motion.p
-          className="px-3 mb-3 text-xs font-medium text-slate-600 uppercase tracking-widest"
+          className="px-3 mb-3 text-xs font-medium text-slate-600 uppercase tracking-widest animated-underline"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -134,8 +156,8 @@ function SidebarContent({
                 )}
                 <Icon
                   className={cn(
-                    'w-4 h-4 shrink-0 transition-colors',
-                    active ? 'text-violet-400' : 'text-slate-500 group-hover:text-slate-300'
+                    'w-4 h-4 shrink-0 transition-all duration-200',
+                    active ? 'text-violet-400' : 'text-slate-500 group-hover:text-slate-300 group-hover:rotate-12'
                   )}
                 />
                 {label}
@@ -154,9 +176,8 @@ function SidebarContent({
         transition={{ delay: 0.6 }}
       >
         <div className="flex items-center gap-3 px-3 py-3 rounded-lg glass">
-          {/* Avatar */}
           <motion.div
-            className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0 shadow-lg shadow-violet-500/20"
+            className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0 avatar-glow"
             whileHover={{ scale: 1.15 }}
           >
             <span className="text-white text-xs font-semibold">
@@ -225,7 +246,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       manager: 'My Team',
       admin: 'Overview',
       approvals: 'Approvals',
-      checkins: 'Check-ins',
+      'check-ins': 'Check-ins',
       users: 'All Users',
       goals: 'All Goals',
       export: 'Reports & Export',
@@ -234,10 +255,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F] flex">
+    <div className="min-h-screen page-bg dot-grid flex">
+      {/* Global floating particles */}
+      <GlobalParticles />
+
       {/* ── Desktop Sidebar ──────────────────────────── */}
       <motion.aside
-        className="hidden lg:flex w-60 shrink-0 flex-col border-r border-white/5 bg-[#0D0D14]"
+        className="hidden lg:flex w-60 shrink-0 flex-col border-r border-white/5 bg-[#0D0D14]/90 backdrop-blur-xl relative z-10"
         initial={{ x: -60, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 25 }}
@@ -272,10 +296,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </AnimatePresence>
 
       {/* ── Main Content ────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Topbar */}
+      <div className="flex-1 flex flex-col min-w-0 relative z-10">
+        {/* Topbar - glassmorphism + gradient border */}
         <motion.header
-          className="sticky top-0 z-30 h-14 flex items-center justify-between px-4 lg:px-8 border-b border-white/5 bg-[#0A0A0F]/80 backdrop-blur-md"
+          className="sticky top-0 z-30 h-14 flex items-center justify-between px-4 lg:px-8 bg-[#07070d]/70 backdrop-blur-xl border-b header-gradient-border"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 25 }}
@@ -291,11 +315,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <h1 className="text-white font-semibold text-base">{getPageTitle()}</h1>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-slate-500 text-sm hidden sm:block truncate max-w-[200px]">
+            <motion.span
+              className="text-slate-500 text-sm hidden sm:block truncate max-w-[200px]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+            >
               {profile?.email}
-            </span>
+            </motion.span>
             <motion.div
-              className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20"
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center avatar-glow"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
@@ -306,7 +335,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </motion.header>
 
-        {/* Page content with fade-in */}
+        {/* Page content with fade-in transition */}
         <motion.main
           key={pathname}
           className="flex-1 p-4 lg:p-8"

@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect, useRef } from 'react';
 import { deleteGoal, submitGoalsForApproval } from '@/app/actions/goals';
 import type { Goal, GoalStatus, UomType } from '@/types/supabase';
 import GoalForm from './GoalForm';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import {
   Plus,
   Pencil,
@@ -33,29 +33,73 @@ const UOM_LABELS: Record<UomType, string> = {
 // ── Status config ─────────────────────────────────────────────
 const STATUS_CONFIG: Record<
   GoalStatus,
-  { label: string; color: string; icon: React.ElementType }
+  { label: string; color: string; icon: React.ElementType; glow: string }
 > = {
   draft: {
     label: 'Draft',
     color: 'bg-slate-700/50 text-slate-300 border-slate-600/50',
     icon: Pencil,
+    glow: '',
   },
   pending_approval: {
     label: 'Pending',
     color: 'bg-amber-500/15 text-amber-400 border-amber-500/25',
     icon: Clock,
+    glow: 'pulse-yellow',
   },
   approved: {
     label: 'Approved',
     color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25',
     icon: CheckCircle2,
+    glow: 'pulse-green',
   },
   rejected: {
     label: 'Rejected',
     color: 'bg-red-500/15 text-red-400 border-red-500/25',
     icon: XCircle,
+    glow: '',
   },
 };
+
+// ── Animated Progress Bar with shimmer + glow endpoint ────────
+function AnimatedProgressBar({ value }: { value: number }) {
+  const [width, setWidth] = useState(0);
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      // Small delay so animation is visible
+      const t = setTimeout(() => setWidth(Math.min(value, 100)), 100);
+      return () => clearTimeout(t);
+    }
+    setWidth(Math.min(value, 100));
+  }, [value]);
+
+  const barColor = value >= 100 ? 'bg-emerald-500' : value >= 80 ? 'bg-amber-500' : 'bg-violet-500';
+  const glowColor = value >= 100 ? 'rgba(16,185,129,0.5)' : value >= 80 ? 'rgba(245,158,11,0.5)' : 'rgba(124,58,237,0.5)';
+
+  return (
+    <div className="h-2.5 bg-white/5 rounded-full overflow-hidden relative">
+      <div
+        className={cn('h-full rounded-full shimmer-continuous relative', barColor)}
+        style={{
+          width: `${width}%`,
+          transition: 'width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          boxShadow: `0 0 12px ${glowColor}`,
+        }}
+      >
+        {/* Pulsing glow at endpoint */}
+        {width > 0 && (
+          <div
+            className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full pulse-endpoint"
+            style={{ background: glowColor }}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
 
 type Props = {
   goals: Goal[];
@@ -73,7 +117,6 @@ export default function GoalList({ goals, year }: Props) {
   const rejectedGoals = goals.filter((g) => g.status === 'rejected');
   const hasDrafts = draftGoals.length > 0;
   const hasRejected = rejectedGoals.length > 0;
-  // Locked only if there are pending_approval or approved goals
   const isLocked = goals.some((g) => g.status === 'pending_approval' || g.status === 'approved');
   const canAddMore = goals.length < 8 && !isLocked;
   const canSubmit = (hasDrafts || hasRejected) && totalWeightage === 100 && !isLocked;
@@ -105,17 +148,15 @@ export default function GoalList({ goals, year }: Props) {
     });
   };
 
-  const weightageColor =
-    totalWeightage === 100
-      ? 'bg-emerald-500'
-      : totalWeightage > 100
-      ? 'bg-red-500'
-      : 'bg-violet-500';
-
   return (
     <div className="space-y-6">
       {/* ── Header + Weightage Summary ───────────────────── */}
-      <div className="bg-white/3 border border-white/5 rounded-xl p-5 space-y-4">
+      <motion.div
+        className="glass rounded-xl p-5 space-y-4 gradient-border"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 20 }}
+      >
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h3 className="text-white font-semibold text-sm">
@@ -131,7 +172,7 @@ export default function GoalList({ goals, year }: Props) {
               onClick={handleAdd}
               disabled={!canAddMore || isPending}
               size="sm"
-              className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 shadow-lg shadow-violet-500/20 gap-1.5"
+              className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 shadow-lg shadow-violet-500/20 gap-1.5 shimmer btn-bounce hover:scale-105 transition-transform"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Goal
@@ -139,14 +180,9 @@ export default function GoalList({ goals, year }: Props) {
           )}
         </div>
 
-        {/* Progress bar */}
+        {/* Animated Progress bar */}
         <div className="space-y-1.5">
-          <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
-            <div
-              className={cn('h-full rounded-full transition-all duration-500', weightageColor)}
-              style={{ width: `${Math.min(totalWeightage, 100)}%` }}
-            />
-          </div>
+          <AnimatedProgressBar value={totalWeightage} />
           <div className="flex justify-between text-[10px] text-slate-600">
             <span>0%</span>
             <span
@@ -168,20 +204,32 @@ export default function GoalList({ goals, year }: Props) {
             <span>100%</span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Error Banner ─────────────────────────────────── */}
-      {error && (
-        <div className="flex items-start gap-2.5 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-          <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-          <p className="text-red-400 text-sm">{error}</p>
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            className="flex items-start gap-2.5 p-3 rounded-lg bg-red-500/10 border border-red-500/20"
+          >
+            <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            <p className="text-red-400 text-sm">{error}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Empty State ──────────────────────────────────── */}
       {goals.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center border border-white/5 border-dashed rounded-xl">
-          <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4">
+        <motion.div
+          className="flex flex-col items-center justify-center py-16 text-center border border-white/5 border-dashed rounded-xl glass"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4 icon-float">
             <Target className="w-6 h-6 text-violet-400" />
           </div>
           <p className="text-white font-medium mb-1">No goals yet</p>
@@ -191,30 +239,36 @@ export default function GoalList({ goals, year }: Props) {
           <Button
             onClick={handleAdd}
             size="sm"
-            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 gap-1.5"
+            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 gap-1.5 shimmer btn-bounce"
           >
             <Plus className="w-3.5 h-3.5" />
             Add your first goal
           </Button>
-        </div>
+        </motion.div>
       )}
 
       {/* ── Rejection Banner ──────────────────────────────── */}
-      {hasRejected && goals[0]?.rejection_reason && (
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
-          <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-red-400 font-medium text-sm">Manager returned your goals for revision</p>
-            <p className="text-red-300/80 text-sm mt-1">&ldquo;{goals[0].rejection_reason}&rdquo;</p>
-            <p className="text-slate-500 text-xs mt-2">Edit your goals below and resubmit when ready.</p>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {hasRejected && goals[0]?.rejection_reason && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20"
+          >
+            <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-red-400 font-medium text-sm">Manager returned your goals for revision</p>
+              <p className="text-red-300/80 text-sm mt-1">&ldquo;{goals[0].rejection_reason}&rdquo;</p>
+              <p className="text-slate-500 text-xs mt-2">Edit your goals below and resubmit when ready.</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* ── Goal Cards ───────────────────────────────────── */}
+      {/* ── Goal Cards with stagger ───────────────────────── */}
       {goals.length > 0 && (
         <div className="space-y-3">
-          {goals.map((goal) => {
+          {goals.map((goal, idx) => {
             const status = STATUS_CONFIG[goal.status];
             const StatusIcon = status.icon;
             const isDraft = goal.status === 'draft';
@@ -222,11 +276,19 @@ export default function GoalList({ goals, year }: Props) {
             const isEditable = (isDraft || isRejected) && !isLocked;
 
             return (
-              <div
+              <motion.div
                 key={goal.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 250,
+                  damping: 22,
+                  delay: idx * 0.08,
+                }}
                 className={cn(
-                  "group bg-white/3 border hover:border-white/10 rounded-xl p-5 transition-all duration-200",
-                  isRejected ? 'border-red-500/20' : 'border-white/5'
+                  "group glass rounded-xl p-5 transition-all duration-300 card-hover",
+                  isRejected && 'border-red-500/20'
                 )}
               >
                 <div className="flex items-start justify-between gap-4">
@@ -250,7 +312,8 @@ export default function GoalList({ goals, year }: Props) {
                       <span
                         className={cn(
                           'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border',
-                          status.color
+                          status.color,
+                          status.glow
                         )}
                       >
                         <StatusIcon className="w-3 h-3" />
@@ -262,7 +325,7 @@ export default function GoalList({ goals, year }: Props) {
                         {goal.description}
                       </p>
                     )}
-                    {/* Meta row: UoM + Target + Deadline */}
+                    {/* Meta row */}
                     <div className="flex items-center gap-3 mt-2 flex-wrap">
                       <span className="text-[11px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/8">
                         {UOM_LABELS[goal.uom_type] ?? goal.uom_type}
@@ -282,7 +345,7 @@ export default function GoalList({ goals, year }: Props) {
 
                   {/* Weightage pill */}
                   <div className="shrink-0 flex flex-col items-end gap-2">
-                    <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg px-3 py-1.5 text-center">
+                    <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg px-3 py-1.5 text-center glow-violet-hover transition-all">
                       <p className="text-violet-300 font-bold text-lg leading-none">
                         {goal.weightage}%
                       </p>
@@ -291,14 +354,17 @@ export default function GoalList({ goals, year }: Props) {
                   </div>
                 </div>
 
-                {/* Weightage bar per card */}
+                {/* Weightage bar per card - animated */}
                 <div className="mt-4">
-                  <Progress
-                    value={goal.weightage}
-                    className="h-1 bg-white/5"
-                  />
+                  <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-violet-500 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${goal.weightage}%` }}
+                      transition={{ delay: 0.4 + idx * 0.08, duration: 0.8, ease: 'easeOut' }}
+                    />
+                  </div>
                 </div>
-
 
                 {/* Actions (for draft and rejected goals) */}
                 {isEditable && (
@@ -308,7 +374,7 @@ export default function GoalList({ goals, year }: Props) {
                       size="sm"
                       onClick={() => handleEdit(goal)}
                       disabled={isPending}
-                      className="h-7 px-3 text-slate-400 hover:text-white hover:bg-white/5 gap-1.5 text-xs"
+                      className="h-7 px-3 text-slate-400 hover:text-white hover:bg-white/5 gap-1.5 text-xs btn-bounce"
                     >
                       <Pencil className="w-3 h-3" />
                       Edit
@@ -318,7 +384,7 @@ export default function GoalList({ goals, year }: Props) {
                       size="sm"
                       onClick={() => handleDelete(goal.id)}
                       disabled={isPending}
-                      className="h-7 px-3 text-slate-400 hover:text-red-400 hover:bg-red-500/10 gap-1.5 text-xs"
+                      className="h-7 px-3 text-slate-400 hover:text-red-400 hover:bg-red-500/10 gap-1.5 text-xs btn-bounce"
                     >
                       {isPending ? (
                         <Loader2 className="w-3 h-3 animate-spin" />
@@ -339,56 +405,58 @@ export default function GoalList({ goals, year }: Props) {
                     </span>
                   </div>
                 )}
-              </div>
+              </motion.div>
             );
           })}
         </div>
       )}
 
       {/* ── Submit Panel ─────────────────────────────────── */}
-      {hasDrafts && (
-        <div
-          className={cn(
-            'border rounded-xl p-5 flex items-center justify-between gap-4 flex-wrap transition-colors duration-300',
-            canSubmit
-              ? 'bg-emerald-500/5 border-emerald-500/20'
-              : 'bg-white/3 border-white/5'
-          )}
-        >
-          <div>
-            <p className="text-white font-medium text-sm">
-              {canSubmit ? '🎉 Ready to submit!' : 'Almost there…'}
-            </p>
-            <p className="text-slate-500 text-xs mt-0.5">
-              {canSubmit
-                ? 'Your goals total 100%. Submit them for manager approval.'
-                : `Total weightage is ${totalWeightage}% — must be exactly 100% to submit.`}
-            </p>
-          </div>
-          <Button
-            onClick={handleSubmit}
-            disabled={!canSubmit || isPending}
+      <AnimatePresence>
+        {hasDrafts && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             className={cn(
-              'gap-2 border-0 shadow-lg font-medium shrink-0',
-              canSubmit
-                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-500/20'
-                : 'bg-white/5 text-slate-500 cursor-not-allowed'
+              'glass rounded-xl p-5 flex items-center justify-between gap-4 flex-wrap transition-colors duration-300',
+              canSubmit && 'border-emerald-500/20'
             )}
           >
-            {isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Submitting…
-              </>
-            ) : (
-              <>
-                <SendHorizonal className="w-4 h-4" />
-                Submit for Approval
-              </>
-            )}
-          </Button>
-        </div>
-      )}
+            <div>
+              <p className="text-white font-medium text-sm">
+                {canSubmit ? '🎉 Ready to submit!' : 'Almost there…'}
+              </p>
+              <p className="text-slate-500 text-xs mt-0.5">
+                {canSubmit
+                  ? 'Your goals total 100%. Submit them for manager approval.'
+                  : `Total weightage is ${totalWeightage}% — must be exactly 100% to submit.`}
+              </p>
+            </div>
+            <Button
+              onClick={handleSubmit}
+              disabled={!canSubmit || isPending}
+              className={cn(
+                'gap-2 border-0 shadow-lg font-medium shrink-0 btn-bounce',
+                canSubmit
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-500/20 shimmer'
+                  : 'bg-white/5 text-slate-500 cursor-not-allowed'
+              )}
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Submitting…
+                </>
+              ) : (
+                <>
+                  <SendHorizonal className="w-4 h-4" />
+                  Submit for Approval
+                </>
+              )}
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── GoalForm Modal ───────────────────────────────── */}
       <GoalForm
