@@ -3,10 +3,12 @@ export const dynamic = 'force-dynamic';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { Users, Unlock, History, Activity } from 'lucide-react';
+import { Users, Unlock, History, Activity, AlertCircle } from 'lucide-react';
 import CsvExportButton from '@/components/admin/CsvExportButton';
 import UnlockGoalButton from '@/components/admin/UnlockGoalButton';
 import SharedGoalDialog from '@/components/admin/SharedGoalDialog';
+import AnalyticsTab from '@/components/admin/AnalyticsTab';
+import EscalationTab from '@/components/admin/EscalationTab';
 import { cn } from '@/lib/utils';
 import type { Profile, Goal, AuditLog } from '@/types/supabase';
 
@@ -40,6 +42,13 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
     .order('full_name', { ascending: true });
   const profiles = (profilesData ?? []) as Profile[];
 
+  // Fetch all goals for analytics and escalations
+  const { data: goalsData } = await supabase
+    .from('goals')
+    .select('*')
+    .eq('year', year);
+  const goals = (goalsData ?? []) as Goal[];
+
   const getProfileName = (id?: string | null) => {
     if (!id) return 'Unknown';
     return profiles.find(p => p.id === id)?.full_name || 'Unknown';
@@ -62,19 +71,21 @@ export default async function AdminDashboardPage({ searchParams }: PageProps) {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 border-b border-white/10">
-        <TabLink id="users" active={activeTab} icon={<Users className="w-4 h-4" />} label="User Management" />
+      <div className="flex items-center gap-2 border-b border-white/10 pb-4 overflow-x-auto scrollbar-none">
+        <TabLink id="users" active={activeTab} icon={<Users className="w-4 h-4" />} label="Users" />
+        <TabLink id="analytics" active={activeTab} icon={<Activity className="w-4 h-4" />} label="Analytics" />
+        <TabLink id="escalations" active={activeTab} icon={<AlertCircle className="w-4 h-4" />} label="Escalations" />
         <TabLink id="unlock" active={activeTab} icon={<Unlock className="w-4 h-4" />} label="Goal Unlock" />
-        <TabLink id="audit" active={activeTab} icon={<History className="w-4 h-4" />} label="Audit Trail" />
-        <TabLink id="completion" active={activeTab} icon={<Activity className="w-4 h-4" />} label="Completion" />
+        <TabLink id="audit" active={activeTab} icon={<History className="w-4 h-4" />} label="Audit Log" />
       </div>
 
       {/* Tab Content */}
       <div className="bg-white/3 border border-white/5 rounded-xl overflow-hidden min-h-[400px]">
         {activeTab === 'users' && <UsersTab profiles={profiles} getProfileName={getProfileName} />}
+        {activeTab === 'analytics' && <AnalyticsTab goals={goals} profiles={profiles} />}
+        {activeTab === 'escalations' && <EscalationTab goals={goals} profiles={profiles} />}
         {activeTab === 'unlock' && <UnlockTab getProfileName={getProfileName} />}
         {activeTab === 'audit' && <AuditTab getProfileName={getProfileName} />}
-        {activeTab === 'completion' && <CompletionTab profiles={profiles} year={year} />}
       </div>
     </div>
   );
@@ -217,76 +228,4 @@ async function AuditTab({ getProfileName }: { getProfileName: (id: string | null
   );
 }
 
-async function CompletionTab({ profiles, year }: { profiles: Profile[], year: number }) {
-  const supabase = await createClient();
-  
-  const { data: checkInsData } = await supabase
-    .from('check_ins')
-    .select('quarter, goal_id')
-    .eq('quarter_year', year);
-  
-  const { data: goalsData } = await supabase
-    .from('goals')
-    .select('id, employee_id')
-    .eq('year', year)
-    .eq('status', 'approved');
 
-  const goals = goalsData ?? [];
-  const checkIns = checkInsData ?? [];
-
-  // Logic: For each employee, did they submit check-ins for all their approved goals in a quarter?
-  // If an employee has no goals, they are marked N/A.
-  
-  const completionMap: Record<string, Record<string, boolean>> = {};
-
-  profiles.forEach(emp => {
-    const empGoals = goals.filter(g => g.employee_id === emp.id);
-    completionMap[emp.id] = { hasGoals: empGoals.length > 0, Q1: false, Q2: false, Q3: false, Q4: false };
-    
-    if (empGoals.length > 0) {
-      ['Q1', 'Q2', 'Q3', 'Q4'].forEach(q => {
-        // Find if they submitted check-ins for ALL their goals for this quarter
-        const submittedCount = empGoals.filter(g => checkIns.some(c => c.goal_id === g.id && c.quarter === q)).length;
-        completionMap[emp.id][q] = submittedCount === empGoals.length && empGoals.length > 0;
-      });
-    }
-  });
-
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm text-slate-300">
-        <thead className="text-xs text-slate-400 uppercase bg-white/5 border-b border-white/10">
-          <tr>
-            <th className="px-6 py-4 font-medium">Employee</th>
-            <th className="px-6 py-4 font-medium text-center">Q1</th>
-            <th className="px-6 py-4 font-medium text-center">Q2</th>
-            <th className="px-6 py-4 font-medium text-center">Q3</th>
-            <th className="px-6 py-4 font-medium text-center">Q4</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-white/5">
-          {profiles.map(p => {
-            const metrics = completionMap[p.id];
-            
-            const renderQuarter = (q: string) => {
-              if (!metrics.hasGoals) return <span className="text-slate-600">-</span>;
-              return metrics[q] 
-                ? <span className="inline-flex w-6 h-6 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">✓</span>
-                : <span className="inline-flex w-6 h-6 items-center justify-center rounded-full bg-red-500/10 text-red-400">✗</span>;
-            };
-
-            return (
-              <tr key={p.id} className="hover:bg-white/5">
-                <td className="px-6 py-4 font-medium text-white">{p.full_name || p.email}</td>
-                <td className="px-6 py-4 text-center">{renderQuarter('Q1')}</td>
-                <td className="px-6 py-4 text-center">{renderQuarter('Q2')}</td>
-                <td className="px-6 py-4 text-center">{renderQuarter('Q3')}</td>
-                <td className="px-6 py-4 text-center">{renderQuarter('Q4')}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-}
