@@ -318,6 +318,44 @@ export default function LoginPage() {
                   )}
                 </Button>
               </motion.div>
+              
+              {/* Hackathon Judge Demo Login Buttons */}
+              <motion.div 
+                className="pt-4 border-t border-white/10 mt-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.0 }}
+              >
+                <p className="text-center text-[10px] text-slate-500 uppercase tracking-widest font-medium mb-3">
+                  Hackathon Judge Fast-Login
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => { setEmail('employee@example.com'); setPassword('password123'); }} 
+                    className="h-8 text-[11px] bg-sky-500/10 border-sky-500/20 hover:bg-sky-500/20 text-sky-400 btn-bounce"
+                  >
+                    Employee
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => { setEmail('manager@example.com'); setPassword('password123'); }} 
+                    className="h-8 text-[11px] bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 text-amber-400 btn-bounce"
+                  >
+                    Manager
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => { setEmail('admin@example.com'); setPassword('password123'); }} 
+                    className="h-8 text-[11px] bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-400 btn-bounce"
+                  >
+                    Admin
+                  </Button>
+                </div>
+              </motion.div>
             </form>
           </div>
 
