@@ -10,7 +10,6 @@ import {
   Target,
   TrendingUp,
   Users,
-  ClipboardCheck,
   BarChart3,
   FileDown,
   Menu,

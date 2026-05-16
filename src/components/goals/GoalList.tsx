@@ -71,7 +71,6 @@ export default function GoalList({ goals, year }: Props) {
   const totalWeightage = goals.reduce((sum, g) => sum + g.weightage, 0);
   const draftGoals = goals.filter((g) => g.status === 'draft');
   const rejectedGoals = goals.filter((g) => g.status === 'rejected');
-  const editableGoals = [...draftGoals, ...rejectedGoals];
   const hasDrafts = draftGoals.length > 0;
   const hasRejected = rejectedGoals.length > 0;
   // Locked only if there are pending_approval or approved goals
