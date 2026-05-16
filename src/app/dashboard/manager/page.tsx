@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic';
 
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { Users, Clock, CheckCircle2, FileEdit, AlertCircle } from 'lucide-react';
 import type { Profile, Goal } from '@/types/supabase';
 import ManagerOverviewClient from '@/components/manager/ManagerOverviewClient';
 
@@ -43,26 +42,26 @@ export default async function ManagerPage() {
     
     let stateLabel = 'Not Started';
     let stateColor = 'bg-slate-800 text-slate-400 border-slate-700/50';
-    let StateIcon = FileEdit;
+    let stateIconName = 'FileEdit';
 
     if (count > 0) {
       if (empGoals.some(g => g.status === 'draft')) {
         stateLabel = 'Drafting';
         stateColor = 'bg-slate-700/50 text-slate-300 border-slate-600/50';
-        StateIcon = FileEdit;
+        stateIconName = 'FileEdit';
       } else if (empGoals.some(g => g.status === 'rejected')) {
         stateLabel = 'Action Required';
         stateColor = 'bg-red-500/15 text-red-400 border-red-500/25 shadow-[0_0_10px_rgba(239,68,68,0.2)]';
-        StateIcon = AlertCircle;
+        stateIconName = 'AlertCircle';
       } else if (empGoals.some(g => g.status === 'pending_approval')) {
         stateLabel = 'Pending Review';
         stateColor = 'bg-amber-500/15 text-amber-400 border-amber-500/25 shadow-[0_0_10px_rgba(245,158,11,0.2)]';
-        StateIcon = Clock;
+        stateIconName = 'Clock';
         pendingCount++;
       } else if (empGoals.every(g => g.status === 'approved')) {
         stateLabel = 'Approved';
         stateColor = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25 shadow-[0_0_10px_rgba(16,185,129,0.2)]';
-        StateIcon = CheckCircle2;
+        stateIconName = 'CheckCircle2';
         approvedCount++;
       }
     }
@@ -72,7 +71,7 @@ export default async function ManagerPage() {
       profile: emp,
       statusLabel: stateLabel,
       statusColor: stateColor,
-      icon: StateIcon,
+      iconName: stateIconName,
       goalCount: count,
       totalWeightage: totalWeight,
     };
@@ -82,7 +81,7 @@ export default async function ManagerPage() {
     {
       label: 'Direct Reports',
       value: team.length,
-      icon: Users,
+      iconName: 'Users',
       color: 'text-violet-400',
       bg: 'bg-violet-500/10',
       glowColor: 'rgba(124,58,237,0.4)',
@@ -90,7 +89,7 @@ export default async function ManagerPage() {
     {
       label: 'Pending Reviews',
       value: pendingCount,
-      icon: Clock,
+      iconName: 'Clock',
       color: 'text-amber-400',
       bg: 'bg-amber-500/10',
       glowColor: 'rgba(245,158,11,0.4)',
@@ -98,7 +97,7 @@ export default async function ManagerPage() {
     {
       label: 'Approved Goal Sheets',
       value: approvedCount,
-      icon: CheckCircle2,
+      iconName: 'CheckCircle2',
       color: 'text-emerald-400',
       bg: 'bg-emerald-500/10',
       glowColor: 'rgba(16,185,129,0.4)',

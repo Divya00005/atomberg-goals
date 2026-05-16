@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Users, ChevronRight } from 'lucide-react';
+import { Users, ChevronRight, Clock, CheckCircle2, FileEdit, AlertCircle } from 'lucide-react';
 import { CountUp } from '@/components/effects/MotionWrappers';
 import { cn } from '@/lib/utils';
 import type { Profile } from '@/types/supabase';
@@ -13,7 +13,7 @@ type TeamStatus = {
   profile: Profile;
   statusLabel: string;
   statusColor: string;
-  icon: React.ElementType;
+  iconName: string;
   goalCount: number;
   totalWeightage: number;
 };
@@ -23,7 +23,7 @@ type Props = {
   stats: {
     label: string;
     value: number;
-    icon: React.ElementType;
+    iconName: string;
     color: string;
     bg: string;
     glowColor: string;
@@ -88,6 +88,14 @@ function TiltCard({ children, index = 0 }: { children: React.ReactNode; index?: 
 
 const floatClasses = ['icon-float', 'icon-float-slow', 'icon-float-fast'];
 
+const iconMap: Record<string, React.ElementType> = {
+  Users,
+  Clock,
+  CheckCircle2,
+  FileEdit,
+  AlertCircle
+};
+
 export default function ManagerOverviewClient({ teamStatus, stats, year }: Props) {
   return (
     <div className="space-y-8 p-4">
@@ -108,7 +116,7 @@ export default function ManagerOverviewClient({ teamStatus, stats, year }: Props
       {/* ── Stat Cards ────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, i) => {
-          const Icon = stat.icon;
+          const Icon = iconMap[stat.iconName] || Users;
           return (
             <TiltCard key={stat.label} index={i}>
               {/* Rotating Gradient Border */}
@@ -149,7 +157,7 @@ export default function ManagerOverviewClient({ teamStatus, stats, year }: Props
         ) : (
           <div className="divide-y divide-white/5 relative">
             {teamStatus.map((emp, i) => {
-              const StatusIcon = emp.icon;
+              const StatusIcon = iconMap[emp.iconName] || FileEdit;
               return (
                 <motion.div
                   key={emp.id}
