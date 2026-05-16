@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import GoalList from '@/components/goals/GoalList';
 import AnimatedStats from '@/components/effects/AnimatedStats';
-import { Target, TrendingUp, Clock, CheckCircle2 } from 'lucide-react';
 import type { Goal } from '@/types/supabase';
 
 
@@ -34,40 +33,7 @@ export default async function EmployeePage() {
     (g) => g.status === 'pending_approval'
   ).length;
 
-  const stats = [
-    {
-      label: 'Total Goals',
-      value: goalList.length || '—',
-      icon: Target,
-      color: 'text-violet-400',
-      bg: 'bg-violet-500/10',
-      sub: `${goalList.length} / 8`,
-    },
-    {
-      label: 'Total Weightage',
-      value: totalWeightage > 0 ? `${totalWeightage}%` : '—',
-      icon: TrendingUp,
-      color: totalWeightage === 100 ? 'text-emerald-400' : 'text-amber-400',
-      bg: totalWeightage === 100 ? 'bg-emerald-500/10' : 'bg-amber-500/10',
-      sub: totalWeightage === 100 ? 'Ready to submit' : `${100 - totalWeightage}% remaining`,
-    },
-    {
-      label: 'Pending Approval',
-      value: pendingCount || '—',
-      icon: Clock,
-      color: 'text-amber-400',
-      bg: 'bg-amber-500/10',
-      sub: pendingCount > 0 ? 'Awaiting manager' : 'None pending',
-    },
-    {
-      label: 'Approved Goals',
-      value: approvedCount || '—',
-      icon: CheckCircle2,
-      color: 'text-emerald-400',
-      bg: 'bg-emerald-500/10',
-      sub: approvedCount > 0 ? `${approvedCount} locked in` : 'None yet',
-    },
-  ];
+
 
   return (
     <div className="space-y-8">
@@ -80,7 +46,12 @@ export default async function EmployeePage() {
       </div>
 
       {/* Stats */}
-      <AnimatedStats stats={stats} />
+      <AnimatedStats 
+        totalGoals={goalList.length}
+        totalWeightage={totalWeightage}
+        pendingCount={pendingCount}
+        approvedCount={approvedCount}
+      />
 
       {/* Goal list */}
       <GoalList goals={goalList} year={year} />

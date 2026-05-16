@@ -3,18 +3,51 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { CountUp } from '@/components/effects/MotionWrappers';
-import type { LucideIcon } from 'lucide-react';
+import { Target, TrendingUp, Clock, CheckCircle2 } from 'lucide-react';
 
-type StatItem = {
-  label: string;
-  value: number | string;
-  icon: LucideIcon;
-  color: string;
-  bg: string;
-  sub: string;
+type AnimatedStatsProps = {
+  totalGoals: number;
+  totalWeightage: number;
+  pendingCount: number;
+  approvedCount: number;
 };
 
-export default function AnimatedStats({ stats }: { stats: StatItem[] }) {
+export default function AnimatedStats({ totalGoals, totalWeightage, pendingCount, approvedCount }: AnimatedStatsProps) {
+  const stats = [
+    {
+      label: 'Total Goals',
+      value: totalGoals || '—',
+      icon: Target,
+      color: 'text-violet-400',
+      bg: 'bg-violet-500/10',
+      sub: `${totalGoals} / 8`,
+    },
+    {
+      label: 'Total Weightage',
+      value: totalWeightage > 0 ? totalWeightage : '—',
+      icon: TrendingUp,
+      color: totalWeightage === 100 ? 'text-emerald-400' : 'text-amber-400',
+      bg: totalWeightage === 100 ? 'bg-emerald-500/10' : 'bg-amber-500/10',
+      sub: totalWeightage === 100 ? 'Ready to submit' : `${100 - totalWeightage}% remaining`,
+    },
+    {
+      label: 'Pending Approval',
+      value: pendingCount || '—',
+      icon: Clock,
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10',
+      sub: pendingCount > 0 ? 'Awaiting manager' : 'None pending',
+    },
+    {
+      label: 'Approved Goals',
+      value: approvedCount || '—',
+      icon: CheckCircle2,
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10',
+      sub: approvedCount > 0 ? `${approvedCount} locked in` : 'None yet',
+    },
+  ];
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map(({ label, value, icon: Icon, color, bg, sub }, i) => (
