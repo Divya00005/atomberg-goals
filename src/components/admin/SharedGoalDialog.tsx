@@ -93,7 +93,7 @@ export default function SharedGoalDialog({ employees }: Props) {
       <Button
         onClick={() => setOpen(true)}
         size="sm"
-        className="bg-indigo-600 hover:bg-indigo-500 text-white border-0 gap-1.5 shadow-lg shadow-indigo-500/20"
+        className="bg-indigo-600 hover:bg-indigo-500 text-white border-0 gap-1.5 rounded-lg shadow-lg shadow-indigo-500/20"
       >
         <Share2 className="w-3.5 h-3.5" />
         Push Shared Goal

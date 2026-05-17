@@ -54,7 +54,8 @@ export default function CsvExportButton() {
       <Button
         onClick={handleExport}
         disabled={isExporting}
-        className="bg-violet-600 hover:bg-violet-500 text-white gap-2 shadow-lg shadow-violet-500/20 border-0"
+        size="sm"
+        className="bg-violet-600 hover:bg-violet-500 text-white gap-2 rounded-lg shadow-lg shadow-violet-500/20 border-0"
       >
         {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
         Export CSV Report
