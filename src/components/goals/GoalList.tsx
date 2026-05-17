@@ -401,7 +401,9 @@ export default function GoalList({ goals, year }: Props) {
                   <div className="flex items-center gap-1.5 mt-4 pt-4 border-t border-white/5">
                     <Lock className="w-3 h-3 text-slate-600" />
                     <span className="text-slate-600 text-xs">
-                      Goal is locked — awaiting manager review
+                      {goal.status === 'approved' 
+                        ? 'Goal is locked — approved for this year' 
+                        : 'Goal is locked — awaiting manager review'}
                     </span>
                   </div>
                 )}
