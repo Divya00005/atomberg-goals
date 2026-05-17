@@ -20,9 +20,9 @@ Use the following accounts to explore the portal from each role's perspective:
 
 | Role | Email | Password |
 |------|-------|----------|
-| 👤 **Employee** | `employee@demo.com` | `password123` |
-| 👨‍💼 **Manager** | `manager@demo.com` | `password123` |
-| 🛡️ **Admin / HR** | `admin@demo.com` | `password123` |
+| 👤 **Employee** | `employee@demo.com` | `Demo@1234` |
+| 👨‍💼 **Manager** | `manager@demo.com` | `Demo@1234` |
+| 🛡️ **Admin / HR** | `admin@demo.com` | `Demo@1234` |
 
 > ⚠️ **Important:** To test multiple roles simultaneously, use separate browsers or an Incognito window. Logging into a second account in the same browser will override the first session.
 
