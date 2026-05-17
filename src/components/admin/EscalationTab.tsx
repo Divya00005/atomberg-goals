@@ -58,7 +58,7 @@ export default function EscalationTab({ profiles, goals }: Props) {
             Rule-Based Escalation Module
           </h3>
           <p className="text-sm text-slate-400 mt-1">
-            Automatically identifies bottlenecks. Click &quot;Nudge&quot; to simulate sending a Microsoft Teams/Email notification via the Audit Trail.
+            Automatically identifies bottlenecks. Click &quot;Nudge&quot; to log a formal reminder in the Audit Trail.
           </p>
         </div>
       </motion.div>
