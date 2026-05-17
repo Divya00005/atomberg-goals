@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Goal Tracker | Atomberg",
-  description: "Set, track, and achieve your goals with the Atomberg Goal Setting & Tracking Portal.",
+  title: "Goal Tracker",
+  description: "Set, track, and achieve your goals with the Goal Setting & Tracking Portal.",
 };
 
 export default function RootLayout({
